@@ -5,6 +5,7 @@ services:
     image: mongo:latest
 
   app:
+    container_name: app
     build: .
     command: "uvicorn main:app --reload"
     environment:

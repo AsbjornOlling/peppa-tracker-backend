@@ -1,16 +1,29 @@
 # std library
 import os
 import hashlib
+from typing import Optional
 
 # 3rd party deps
-from fastapi import FastAPI, HTTPException
+import jwt
+from fastapi import (
+    FastAPI,
+    HTTPException,
+    Response,
+    Request,
+    Cookie
+)
 from pydantic import BaseModel
 from pymongo import MongoClient
 
+# secrets sshhhh
+DEVICE_SHARED_KEY: str = os.getenv("DEVICE_SHARED_KEY", "changeme123")
+JWT_SECRET: str = os.urandom(64).hex()
 
-DEVICE_SHARED_KEY = os.getenv("DEVICE_SHARED_KEY", "changeme123")
+# mongo stuff
 dbclient = MongoClient(os.getenv("MONGO_CONNECTION_STRONG", "mongodb://db"))
 db = dbclient.peppa
+
+# lets go fastapi
 app = FastAPI()
 
 
@@ -27,6 +40,15 @@ class UserRegistration(BaseModel):
 class UserLogin(BaseModel):
     username: str
     password: str
+
+
+async def check_auth(session: Optional[Cookie]) -> dict:
+    if not session:
+        raise HTTPException(status_code=401, description="Not authenticated")
+    try:
+        return jwt.decode(str(session), JWT_SECRET)
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, description="Not authenticated")
 
 
 @app.get("/")
@@ -47,7 +69,7 @@ def register_user(data: UserRegistration):
     """ check that the username does not exit
         then hash the password and put stuff into database
     """
-    if db.users.find({"username": data.username}).count():
+    if db.users.count_documents({"username": data.username}, limit=1):
         raise HTTPException(status_code=401, detail="Username already taken.")
 
     db.users.insert_one({
@@ -57,15 +79,28 @@ def register_user(data: UserRegistration):
 
 
 @app.post("/login")
-def login(data: UserLogin):
-    # TODO: hash the password and compare to entry in db
-    #       set cookie if they match.
-    #       all other endpoints should 401 if a cookie is missing 
-    result = db.users.find_one({
-        "username": data.username,
-        "password": hashlib.sha256(data.password.encode()).hexdigest()
-    })
+def login(data: UserLogin, response: Response):
+    """ Hash the password and compare to entry in db
+        set cookie if they match.
+    """
+    result = db.users.count_documents(
+        {
+            "username": data.username,
+            "password": hashlib.sha256(data.password.encode()).hexdigest()
+        },
+        limit=1
+    )
+
+    # return 401 on bad credentials
     if not result:
         raise HTTPException(status_code=401, detail="Credentials not found in database.")
 
-    # TODO: set session cookie
+    # set session cookie
+    jwt_cookie = jwt.encode({"username": data.username}, JWT_SECRET)
+    response.set_cookie(key="session", value=jwt_cookie)
+
+
+@app.post("/logout")
+def logout(response: Response):
+    """ Delete cookie when logging out """
+    response.delete_cookie(key="session")

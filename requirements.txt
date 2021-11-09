@@ -40,6 +40,8 @@ py==1.11.0
     # via pytest
 pydantic==1.8.2
     # via fastapi
+pyjwt==2.3.0
+    # via -r requirements.in
 pymongo==3.12.1
     # via -r requirements.in
 pyparsing==2.4.7

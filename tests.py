@@ -2,17 +2,19 @@
 import uuid
 
 # deps
+import pytest
 from fastapi.testclient import TestClient
 
 # local imports
 import main
 
 
-client = TestClient(main.app)
 
-
-def test_register_user():
+@pytest.fixture
+def logged_in_user():
     """ Users register and log in """
+    client = TestClient(main.app)
+
     username = str(uuid.uuid4())
     password = "really great password"
 
@@ -35,10 +37,37 @@ def test_register_user():
         }
     )
     assert r.status_code == 200, "Could not sign in new user"
+    assert "session" in client.cookies
+
+    return username, password, client
+
+
+@pytest.fixture
+def registered_device():
+    """ Registering a device with the proper shared key """
+    client = TestClient(main.app)
+    device_id = str(uuid.uuid4())
+    r = client.post(
+        "/register_device",
+        json={
+            "device_id": device_id,
+            "shared_key": main.DEVICE_SHARED_KEY
+        }
+    )
+    assert r.status_code == 200
+    return device_id, client
+
+
+def test_client_login_logout(logged_in_user):
+    username, password, client = logged_in_client
+    assert "session" in client.cookies
+    client.post("/logout")
+    assert "session" not in client.cookies
 
 
 def test_bad_login():
     """ Logging in with bad credentials should fail with 401 Unauthorized """
+    client = TestClient(main.app)
     r = client.post(
         "/login",
         json={
@@ -49,13 +78,17 @@ def test_bad_login():
     assert r.status_code == 401
 
 
-def test_register_device():
-    """ Registering a device with the proper shared key """
+def test_pair_device(logged_in_user, registered_device):
+    username, password, client = logged_in_user
+    device_id, _ = registered_device
+
     r = client.post(
-        "/register_device",
-        json={
-            "device_id": "abcd",
-            "shared_key": main.DEVICE_SHARED_KEY
-        }
+        "/pair_device",
+        json={"device_id": device_id}
     )
-    assert r.status_code == 200
+    assert r.status_code == 200, "Failed to pair device"
+
+    r = client.get("/paired_devices")
+    assert r.status_code == 200, "Failed listing paired devices"
+    paired_device_ids = r.json()
+    assert device_id in paired_device_ids, "Didn't find expected device id"

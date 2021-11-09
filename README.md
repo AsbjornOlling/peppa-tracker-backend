@@ -3,19 +3,19 @@
 
 ## How to run (with docker)
 
-We assume that you have docker and docker-compose installed.
+We assume that you have make, docker and docker-compose installed.
 
-If you run this command, it will create a new database and the python application.
-It should reload on any code changes:
+If you run the command below command, it will create a new database and the python application, listening on localhost:8080.
+It will reload on any code changes, but you need to restart it if you add a dependency.
 
 ```sh
-docker-compose up
+make docker-run
 ```
 
-If you want to run unit tests (inside docker):
+If you want to run unit tests (also inside docker):
 
 ```sh
-make test
+make docker-test
 ```
 
 ## How to run (without docker)

@@ -1,0 +1,11 @@
+name: Test w/ docker
+on: push
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install make
+        run: sudo apt-get install -y make
+      - name: Test
+        run: make test

@@ -59,7 +59,7 @@ def registered_device():
 
 
 def test_client_login_logout(logged_in_user):
-    username, password, client = logged_in_client
+    username, password, client = logged_in_user
     assert "session" in client.cookies
     client.post("/logout")
     assert "session" not in client.cookies
@@ -82,13 +82,16 @@ def test_pair_device(logged_in_user, registered_device):
     username, password, client = logged_in_user
     device_id, _ = registered_device
 
-    r = client.post(
-        "/pair_device",
-        json={"device_id": device_id}
-    )
-    assert r.status_code == 200, "Failed to pair device"
+    r = client.post(f"/pair_device/{device_id}")
+    assert r.status_code == 200, f"Failed to pair device: {r.text}"
 
     r = client.get("/paired_devices")
     assert r.status_code == 200, "Failed listing paired devices"
     paired_device_ids = r.json()
     assert device_id in paired_device_ids, "Didn't find expected device id"
+
+
+def test_unauthorized_pair_device(registered_device):
+    device_id, client = registered_device
+    r = client.post(f"/pair_device/{device_id}")
+    assert r.status_code == 401

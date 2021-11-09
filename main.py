@@ -42,13 +42,13 @@ class UserLogin(BaseModel):
     password: str
 
 
-async def check_auth(session: Optional[Cookie]) -> dict:
+def check_auth(session: Optional[str]) -> dict:
     if not session:
-        raise HTTPException(status_code=401, description="Not authenticated")
+        raise HTTPException(status_code=401, detail="No session cookie found.")
     try:
-        return jwt.decode(str(session), JWT_SECRET)
-    except jwt.InvalidTokenError:
-        raise HTTPException(status_code=401, description="Not authenticated")
+        return jwt.decode(session, JWT_SECRET, algorithms=["HS512"])
+    except jwt.InvalidTokenError as e:
+        raise HTTPException(status_code=401, detail=f"Invalid JWT: {e}")
 
 
 @app.get("/")
@@ -60,8 +60,12 @@ def index():
 
 @app.post("/register_device")
 def register_device(data: DeviceRegistration):
-    # TODO: check shared key, write device into database
-    NotImplemented
+    # check shared key, write device into database
+    if data.shared_key != DEVICE_SHARED_KEY:
+        raise HTTPException(status_code=401, detail="Incorrect shared_key.")
+
+    # put new device_id in db
+    db.devices.insert_one({"device_id": data.device_id})
 
 
 @app.post("/register_user")
@@ -96,7 +100,7 @@ def login(data: UserLogin, response: Response):
         raise HTTPException(status_code=401, detail="Credentials not found in database.")
 
     # set session cookie
-    jwt_cookie = jwt.encode({"username": data.username}, JWT_SECRET)
+    jwt_cookie = jwt.encode({"username": data.username}, JWT_SECRET, algorithm="HS512")
     response.set_cookie(key="session", value=jwt_cookie)
 
 
@@ -104,3 +108,27 @@ def login(data: UserLogin, response: Response):
 def logout(response: Response):
     """ Delete cookie when logging out """
     response.delete_cookie(key="session")
+
+
+@app.post("/pair_device/{device_id}")
+def pair_device(device_id: str, session: Optional[str] = Cookie(None)):
+    """ Pair device with user """
+    session_data = check_auth(session)
+
+    # check that device_id exists
+    if not db.devices.count_documents({"device_id": device_id}, limit=1):
+        raise HTTPException(status_code=404, detail="device_id not found.")
+
+    db.pairings.insert_one({
+        "username": session_data["username"],
+        "device_id": device_id
+    })
+
+
+@app.get("/paired_devices")
+def paired_devices(session: Optional[str] = Cookie(None)):
+    """ List paired devices for user """
+    session_data = check_auth(session)
+    results = db.pairings.find({"username": session_data["username"]})
+    device_ids = [r["device_id"] for r in results]
+    return device_ids

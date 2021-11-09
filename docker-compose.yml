@@ -7,6 +7,8 @@ services:
   app:
     build: .
     command: "uvicorn main:app --reload"
+    environment:
+      MONGODB_CONNECTION_STRING: "mongodb://db"
     volumes:
       - "./:/app:rw"
     depends_on:

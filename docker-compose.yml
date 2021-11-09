@@ -1,0 +1,12 @@
+version: "3"
+
+services:
+  db:
+    image: mongo:latest
+
+  app:
+    build: .
+    command: "uvicorn main:app --reload"
+    volumes:
+      - "./:/app:ro"
+    restart: always

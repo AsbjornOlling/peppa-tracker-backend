@@ -5,5 +5,6 @@
       python38Packages.fastapi
       python38Packages.pip-tools
       python38Packages.uvicorn
+      python38Packages.pytest
     ];
 }

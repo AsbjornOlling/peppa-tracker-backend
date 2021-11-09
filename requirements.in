@@ -1,3 +1,5 @@
 fastapi
 uvicorn
 pip-tools
+pytest
+requests

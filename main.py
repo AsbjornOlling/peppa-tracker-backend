@@ -38,7 +38,7 @@ def register_device(data: DeviceRegistration):
     NotImplemented
 
 
-@app.post("/register_user")
+@app.post("/register_user", status_code=400)
 def register_user(data: UserRegistration):
     # TODO: check that the username does not exit
     #       then hash the password

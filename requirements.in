@@ -3,3 +3,4 @@ uvicorn
 pip-tools
 pytest
 requests
+pymongo

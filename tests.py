@@ -1,3 +1,6 @@
+# std lib
+import uuid
+
 # deps
 from fastapi.testclient import TestClient
 
@@ -10,25 +13,28 @@ client = TestClient(main.app)
 
 def test_register_user():
     """ Users register and log in """
+    username = str(uuid.uuid4())
+    password = "really great password"
+
     # register user
     r = client.post(
         "/register_user",
         json={
-            "username": "user",
-            "password": "pass"
+            "username": username,
+            "password": password
         }
     )
-    assert r.status_code == 200
+    assert r.status_code == 200, "Failed registering new user"
 
     # login user
     r = client.post(
         "/login",
         json={
-            "username": "user",
-            "password": "pass"
+            "username": username,
+            "password": password
         }
     )
-    assert r.status_code == 200
+    assert r.status_code == 200, "Could not sign in new user"
 
 
 def test_bad_login():

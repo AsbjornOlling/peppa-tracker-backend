@@ -8,5 +8,7 @@ services:
     build: .
     command: "uvicorn main:app --reload"
     volumes:
-      - "./:/app:ro"
-    restart: always
+      - "./:/app:rw"
+    depends_on:
+      - "db"
+    restart: "always"

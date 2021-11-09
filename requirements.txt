@@ -40,6 +40,8 @@ py==1.11.0
     # via pytest
 pydantic==1.8.2
     # via fastapi
+pymongo==3.12.1
+    # via -r requirements.in
 pyparsing==2.4.7
     # via packaging
 pytest==6.2.5

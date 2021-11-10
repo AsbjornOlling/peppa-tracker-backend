@@ -13,14 +13,14 @@ from fastapi import (
     Cookie
 )
 from pydantic import BaseModel
-from pymongo import MongoClient
+import motor.motor_asyncio
 
 # secrets sshhhh
 DEVICE_SHARED_KEY: str = os.getenv("DEVICE_SHARED_KEY", "changeme123")
 JWT_SECRET: str = os.urandom(64).hex()
 
 # mongo stuff
-dbclient = MongoClient(os.getenv("MONGO_CONNECTION_STRONG", "mongodb://db"))
+dbclient = motor.motor_asyncio.AsyncIOMotorClient(os.getenv("MONGO_CONNECTION_STRONG", "mongodb://db"))
 db = dbclient.peppa
 
 # lets go fastapi
@@ -59,35 +59,35 @@ def index():
 
 
 @app.post("/register_device")
-def register_device(data: DeviceRegistration):
+async def register_device(data: DeviceRegistration):
     # check shared key, write device into database
     if data.shared_key != DEVICE_SHARED_KEY:
         raise HTTPException(status_code=401, detail="Incorrect shared_key.")
 
     # put new device_id in db
-    db.devices.insert_one({"device_id": data.device_id})
+    await db.devices.insert_one({"device_id": data.device_id})
 
 
 @app.post("/register_user")
-def register_user(data: UserRegistration):
+async def register_user(data: UserRegistration):
     """ check that the username does not exit
         then hash the password and put stuff into database
     """
-    if db.users.count_documents({"username": data.username}, limit=1):
+    if await db.users.count_documents({"username": data.username}, limit=1):
         raise HTTPException(status_code=401, detail="Username already taken.")
 
-    db.users.insert_one({
+    await db.users.insert_one({
         "username": data.username,
         "password": hashlib.sha256(data.password.encode()).hexdigest()
     })
 
 
 @app.post("/login")
-def login(data: UserLogin, response: Response):
+async def login(data: UserLogin, response: Response):
     """ Hash the password and compare to entry in db
         set cookie if they match.
     """
-    result = db.users.count_documents(
+    result = await db.users.count_documents(
         {
             "username": data.username,
             "password": hashlib.sha256(data.password.encode()).hexdigest()
@@ -105,30 +105,29 @@ def login(data: UserLogin, response: Response):
 
 
 @app.post("/logout")
-def logout(response: Response):
+async def logout(response: Response):
     """ Delete cookie when logging out """
     response.delete_cookie(key="session")
 
 
 @app.post("/pair_device/{device_id}")
-def pair_device(device_id: str, session: Optional[str] = Cookie(None)):
+async def pair_device(device_id: str, session: Optional[str] = Cookie(None)):
     """ Pair device with user """
     session_data = check_auth(session)
 
     # check that device_id exists
-    if not db.devices.count_documents({"device_id": device_id}, limit=1):
+    if not await db.devices.count_documents({"device_id": device_id}, limit=1):
         raise HTTPException(status_code=404, detail="device_id not found.")
 
-    db.pairings.insert_one({
+    await db.pairings.insert_one({
         "username": session_data["username"],
         "device_id": device_id
     })
 
 
 @app.get("/paired_devices")
-def paired_devices(session: Optional[str] = Cookie(None)):
+async def paired_devices(session: Optional[str] = Cookie(None)):
     """ List paired devices for user """
     session_data = check_auth(session)
-    results = db.pairings.find({"username": session_data["username"]})
-    device_ids = [r["device_id"] for r in results]
-    return device_ids
+    results = await db.pairings.find({"username": session_data["username"]})
+    return [r["device_id"] for r in results]

@@ -3,5 +3,7 @@ uvicorn
 pip-tools
 pytest
 requests
-pymongo
 PyJWT
+motor
+httpx
+trio

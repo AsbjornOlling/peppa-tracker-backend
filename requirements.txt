@@ -22,6 +22,8 @@ click==8.0.3
     # via
     #   pip-tools
     #   uvicorn
+coverage==6.1.2
+    # via -r requirements.in
 fastapi==0.68.2
     # via -r requirements.in
 h11==0.12.0

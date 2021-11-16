@@ -54,6 +54,22 @@ async def logged_in_user():
     return username, password, client
 
 
+@pytest.mark.asyncio
+async def test_taken_username(logged_in_user):
+    username, _, _client = logged_in_user
+    await _client.aclose()
+
+    async with new_client() as client:
+        r = await client.post(
+            "/register_user",
+            json={
+                "username": username,
+                "password": "whatever",
+            }
+        )
+    assert r.status_code == 409  # Conflict
+
+
 @pytest.fixture
 async def registered_device():
     """ Registering a device with the proper shared key """
@@ -68,6 +84,21 @@ async def registered_device():
     )
     assert r.status_code == 200
     return device_id, client
+
+
+@pytest.mark.asyncio
+async def test_unauthenticated_device_register():
+    """ Registering a device with the proper shared key """
+    device_id = str(uuid.uuid4())
+    async with new_client() as client:
+        r = await client.post(
+            "/register_device",
+            json={
+                "device_id": device_id,
+                "shared_key": "not-the-key"
+            }
+        )
+    assert r.status_code == 401
 
 
 @pytest.mark.asyncio
@@ -104,8 +135,7 @@ async def test_pair_device(logged_in_user, registered_device):
 
     r = await client.get("/paired_devices")
     assert r.status_code == 200, "Failed listing paired devices"
-    paired_device_ids = r.json()
-    assert device_id in paired_device_ids, "Didn't find expected device id"
+    assert device_id in r.json(), "Didn't find expected device id"
     await client.aclose()
 
 
@@ -115,3 +145,19 @@ async def test_unauthorized_pair_device(registered_device):
     r = await client.post(f"/pair_device/{device_id}")
     assert r.status_code == 401
     await client.aclose()
+
+
+@pytest.mark.asyncio
+async def test_pair_unknown_device(logged_in_user):
+    _, _, client = logged_in_user
+    r = await client.post(f"/pair_device/not-a-real-device")
+    assert r.status_code == 404
+    await client.aclose()
+
+
+@pytest.mark.asyncio
+async def test_invalidt_session():
+    async with new_client() as client:
+        client.cookies["session"] = "foobar"
+        r = await client.get("/paired_devices")
+    assert r.status_code == 401

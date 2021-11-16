@@ -80,7 +80,7 @@ async def register_user(data: UserRegistration):
     """
     db = await get_db()
     if await db.users.count_documents({"username": data.username}, limit=1):
-        raise HTTPException(status_code=401, detail="Username already taken.")
+        raise HTTPException(status_code=409, detail="Username already taken.")  # 409 Conflict
 
     await db.users.insert_one({
         "username": data.username,

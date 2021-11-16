@@ -31,21 +31,6 @@ async def get_db():
     return db
 
 
-class DeviceRegistration(BaseModel):
-    device_id: str
-    shared_key: str
-
-
-class UserRegistration(BaseModel):
-    username: str
-    password: str
-
-
-class UserLogin(BaseModel):
-    username: str
-    password: str
-
-
 def check_auth(session: Optional[str]) -> dict:
     if not session:
         raise HTTPException(status_code=401, detail="No session cookie found.")
@@ -62,6 +47,11 @@ def index():
     return "Hello, world!"
 
 
+class DeviceRegistration(BaseModel):
+    device_id: str
+    shared_key: str
+
+
 @app.post("/register_device")
 async def register_device(data: DeviceRegistration):
     # check shared key, write device into database
@@ -71,6 +61,11 @@ async def register_device(data: DeviceRegistration):
     # put new device_id in db
     db = await get_db()
     await db.devices.insert_one({"device_id": data.device_id})
+
+
+class UserRegistration(BaseModel):
+    username: str
+    password: str
 
 
 @app.post("/register_user")
@@ -86,6 +81,11 @@ async def register_user(data: UserRegistration):
         "username": data.username,
         "password": hashlib.sha256(data.password.encode()).hexdigest()
     })
+
+
+class UserLogin(BaseModel):
+    username: str
+    password: str
 
 
 @app.post("/login")

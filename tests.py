@@ -124,14 +124,19 @@ async def test_bad_login():
     assert r.status_code == 401
 
 
-@pytest.mark.asyncio
-async def test_pair_device(logged_in_user, registered_device):
-    username, password, client = logged_in_user
+@pytest.fixture
+async def paired_user_and_device(logged_in_user, registered_device):
+    _, _, client = logged_in_user
     device_id, device_client = registered_device
-    await device_client.aclose()
-
     r = await client.post(f"/pair_device/{device_id}")
     assert r.status_code == 200, f"Failed to pair device: {r.text}"
+    return (logged_in_user, registered_device)
+
+
+@pytest.mark.asyncio
+async def test_pair_device(paired_user_and_device):
+    (username, password, client), (device_id, device_client) = paired_user_and_device
+    await device_client.aclose()
 
     r = await client.get("/paired_devices")
     assert r.status_code == 200, "Failed listing paired devices"
@@ -156,7 +161,7 @@ async def test_pair_unknown_device(logged_in_user):
 
 
 @pytest.mark.asyncio
-async def test_invalidt_session():
+async def test_invalid_session():
     async with new_client() as client:
         client.cookies["session"] = "foobar"
         r = await client.get("/paired_devices")

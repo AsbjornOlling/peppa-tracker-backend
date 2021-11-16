@@ -6,4 +6,4 @@ requests
 PyJWT
 motor
 httpx
-trio
+pytest-asyncio

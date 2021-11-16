@@ -1,5 +1,6 @@
 # std lib
 import uuid
+import asyncio
 
 # deps
 import pytest
@@ -10,12 +11,16 @@ from httpx import AsyncClient
 import main
 
 
-@pytest.mark.anyio
-async def test_stupid():
-    assert True
-
-
 new_client = lambda: AsyncClient(app=main.app, base_url="http://localhost:8080")
+
+
+@pytest.mark.asyncio
+async def test_hello_world():
+    async with new_client() as client:
+        r = await client.get("/")
+    assert 200 == r.status_code 
+    assert "Hello, world!" in r.text
+
 
 @pytest.fixture
 async def logged_in_user():
@@ -65,42 +70,48 @@ async def registered_device():
     return device_id, client
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_client_login_logout(logged_in_user):
     username, password, client = logged_in_user
     assert "session" in client.cookies
     await client.post("/logout")
     assert "session" not in client.cookies
+    await client.aclose()
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_bad_login():
     """ Logging in with bad credentials should fail with 401 Unauthorized """
-    client = new_client()
-    r = await client.post(
-        "/login",
-        json={
-            "username": "foo",
-            "password": "bar"
-        }
-    )
+    async with new_client() as client:
+        r = await client.post(
+            "/login",
+            json={
+                "username": "foo",
+                "password": "bar"
+            }
+        )
     assert r.status_code == 401
 
 
-# def test_pair_device(logged_in_user, registered_device):
-#     username, password, client = logged_in_user
-#     device_id, _ = registered_device
-# 
-#     r = client.post(f"/pair_device/{device_id}")
-#     assert r.status_code == 200, f"Failed to pair device: {r.text}"
-# 
-#     r = client.get("/paired_devices")
-#     assert r.status_code == 200, "Failed listing paired devices"
-#     paired_device_ids = r.json()
-#     assert device_id in paired_device_ids, "Didn't find expected device id"
-# 
-# 
-# def test_unauthorized_pair_device(registered_device):
-#     device_id, client = registered_device
-#     r = client.post(f"/pair_device/{device_id}")
-#     assert r.status_code == 401
+@pytest.mark.asyncio
+async def test_pair_device(logged_in_user, registered_device):
+    username, password, client = logged_in_user
+    device_id, device_client = registered_device
+    await device_client.aclose()
+
+    r = await client.post(f"/pair_device/{device_id}")
+    assert r.status_code == 200, f"Failed to pair device: {r.text}"
+
+    r = await client.get("/paired_devices")
+    assert r.status_code == 200, "Failed listing paired devices"
+    paired_device_ids = r.json()
+    assert device_id in paired_device_ids, "Didn't find expected device id"
+    await client.aclose()
+
+
+@pytest.mark.asyncio
+async def test_unauthorized_pair_device(registered_device):
+    device_id, client = registered_device
+    r = await client.post(f"/pair_device/{device_id}")
+    assert r.status_code == 401
+    await client.aclose()

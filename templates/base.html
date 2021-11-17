@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>Pepa Tracker</title>
+
+<style>
+
+      body {
+        background-image: url('pepaBackground.jpg');
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+         background-size: 100% 100%;
+      }
+      button{
+          text-align: center;
+          padding: 2px;
+          background-color: #FF6161;
+          color: black;
+      }
+      .box{
+          /*position: absolute;*/
+          /*top: 20%;*/
+          left:25%;
+          width: 40%;
+          height:40%;
+          text-align: center;
+      }
+      .addnewBox{
+          border: none;
+          background-color: #FF6161;
+          /*position: absolute;*/
+          /*top: 20%;*/
+          left:35%;
+          text-align: center;
+          width:max-content;
+          height:max-content;
+      }
+      .addnewCross{
+          width:50px;
+          height:50px;
+          border-radius: 30px;
+          position: absolute;
+          bottom: 10px;
+          right: 10px;
+      }
+      ul {
+        list-style-type: none;
+      }
+
+</style>
+
+</head>
+
+
+<body>
+<div class="box" style="border: 1px solid #FF6161;">
+    <br>
+    <img src="download.png" style="position: center; width:110px; height:110px;"> <br><br>
+    <button id="sendmessage"> Send message </button><br><br>
+    <button id="listenmessage"> Listen message </button><br><br>
+    <button id="locatekid"> Locate kid </button><br><br>
+</div>
+
+<a href="javascript:void(0)" onclick="modal_open('addNewDevice')">
+   <button class="addnewCross" id="add"> + </button>
+</a>
+
+<div class="modal" style="display: none; background: #FF6161" id="addNewDevice">
+         <a href="javascript:void(0)" onclick="modal_close('addNewDevice')">
+                <button style="border-radius: 25px; width:20px; height:20px; position: fixed"> X </button>
+         </a>
+</div>
+
+<div class="addnewBox">
+    <br>
+
+      <form method="post" action="/register_device">
+        <fieldset>
+            <legend>Add new device</legend>
+            <ul>
+                <li>Device ID: <input name="deviceID" style="background-color: antiquewhite">
+                </li>
+                <li>Kid name: <input name="kidName" style="background-color: antiquewhite">
+                </li>
+            </ul><input type="submit" style="text-align: center; padding: 2px; background-color: #ffc0c1; color: black;" value="Add device">
+        </fieldset>
+    </form>
+</div>
+
+<div class="box">
+    <br>
+    <form method="post" action="/login">
+        <fieldset>
+            <legend>Log in</legend>
+            <ul>
+                <li>Username: <input name="username" style="background-color: antiquewhite">
+                </li>
+                <li>Password: <input name="password" style="background-color: antiquewhite">
+                </li>
+            </ul><input type="submit" style="text-align: center; padding: 2px; background-color: #ffc0c1; color: black;" value="Log in">
+        </fieldset>
+    </form>
+            <p> Not registered? <a href="/">Register here. </a></p>
+</div>
+
+<div class="box">
+    <br>
+    <form method="post" action="/register_user">
+        <fieldset>
+            <legend>Register</legend>
+            <ul>
+               <li>Username: <input name="username" style="background-color: antiquewhite">
+                </li>
+                <li>Password: <input name="password" style="background-color: antiquewhite">
+                </li>
+            </ul><input type="submit" style="text-align: center; padding: 2px; background-color: #ffc0c1; color: black;" value="Register">
+        </fieldset>
+    </form>
+    <p> Already registered? <a href="/">Log in. </a></p>
+</div>
+
+</body>
+
+

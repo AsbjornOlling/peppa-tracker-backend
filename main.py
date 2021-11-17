@@ -26,7 +26,7 @@ app = FastAPI()
 
 async def get_db():
     """ Make client for mongo db. """
-    dbclient = motor.motor_asyncio.AsyncIOMotorClient(os.getenv("MONGO_CONNECTION_STRONG", "mongodb://db"))
+    dbclient = motor.motor_asyncio.AsyncIOMotorClient(os.getenv("MONGO_CONNECTION_STRING", "mongodb://db"))
     db = dbclient.peppa
     return db
 

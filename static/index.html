@@ -1,80 +1,91 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Pepa Tracker</title>
-
-<style>
-    body {
-        background-image: url('static/pepaBackground.jpg');
-        background-repeat: no-repeat;
-        background-attachment: fixed;
-        background-size: 100% 100%;
-    }
-    button{
-        text-align: center;
-        padding: 2px;
-        background-color: #FF6161;
-        color: black;
-    }
-    .box{
-        /*position: absolute;*/
-        /*top: 20%;*/
-        left:25%;
-        width: 40%;
-        height:40%;
-        text-align: center;
-    }
-    .addnewBox{
-        border: none;
-        background-color: #FF6161;
-        /*position: absolute;*/
-        /*top: 20%;*/
-        left:35%;
-        text-align: left;
-        width: max-content;
-        height: max-content;
-        padding: 1em;
-        margin: auto;
-        border-radius: 5%;
-    }
-    .addnewBoxHeader{
-      text-align: center;
-    }
-    .addnewCross{
-        width:50px;
-        height:50px;
-        border-radius: 30px;
-        position: absolute;
-        bottom: 10px;
-        right: 10px;
-    }
-    ul {
-        list-style-type: none;
-    }
-</style>
-
-<script>
-  // some js utilities
-  function showElement(idStr) {
-    console.log("Showing element " + idStr)
-    document.getElementById(idStr).removeAttribute("hidden");
-  }
-
-  function hideElement(idStr) {
-    console.log("Hiding element " + idStr)
-    document.getElementById(idStr).setAttribute("hidden", true);
-  }
-</script>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Pepa Tracker</title>
+    <style>
+        body {
+            background-image: url('static/pepaBackground.jpg');
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size: 100% 100%;
+        }
+        button{
+            text-align: center;
+            padding: 2px;
+            background-color: #FF6161;
+            color: black;
+        }
+        .box {
+            /*position: absolute;*/
+            /*top: 20%;*/
+            margin: auto;
+            left:25%;
+            width: 40%;
+            height:40%;
+            text-align: center;
+        }
+        .addnewBox{
+            border: none;
+            background-color: #FF6161;
+            /*position: absolute;*/
+            /*top: 20%;*/
+            left:35%;
+            text-align: left;
+            width: max-content;
+            height: max-content;
+            padding: 1em;
+            margin: auto;
+            border-radius: 5%;
+        }
+        .addnewBoxHeader{
+          text-align: center;
+        }
+        .addnewCross{
+            width:50px;
+            height:50px;
+            border-radius: 30px;
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+        }
+        ul {
+            list-style-type: none;
+        }
+    </style>
+    
+    <script>
+      // some js utilities
+      function showElement(idStr) {
+        console.log("Showing element " + idStr)
+        document.getElementById(idStr).removeAttribute("hidden");
+      }
+    
+      function hideElement(idStr) {
+        console.log("Hiding element " + idStr)
+        document.getElementById(idStr).setAttribute("hidden", true);
+      }
+    
+      // on page init: check out and show appropriate ui
+      fetch("/auth_status").then(
+        r => {
+          if (r.status == 200) {
+            // user is logged in. show whatever ui
+            showElement("kid")
+          } else {
+            // user needs to log in
+            showElement("login")
+          }
+        }
+      )
+    </script>
 </head>
-
 
 <body>
 
 <!-- Kid UI: Send and receive messages. -->
-<div class="box" style="border: 1px solid #FF6161;" hidden>
+<div id="kid" class="box" style="border: 1px solid #FF6161;" hidden>
     <br>
     <img src="static/download.png" style="position: center; width:110px; height:110px;"> <br><br>
     <button id="sendmessage"> Send message </button><br><br>
@@ -125,10 +136,10 @@
             </ul><input type="submit" style="text-align: center; padding: 2px; background-color: #ffc0c1; color: black;" value="Log in">
         </fieldset>
     </form>
-    <p> Not registered? <a href="/">Register here. </a></p>
+    <p> Not registered? <a href="#" onclick="showElement('register'); hideElement('login')">Register here. </a></p>
 </div>
 
-<div class="box" hidden>
+<div id="register" class="box" hidden>
     <br>
     <form method="post" action="/register_user">
         <fieldset>
@@ -141,6 +152,6 @@
             </ul><input type="submit" style="text-align: center; padding: 2px; background-color: #ffc0c1; color: black;" value="Register">
         </fieldset>
     </form>
-    <p> Already registered? <a href="/">Log in. </a></p>
+    <p> Already registered? <a href="#" onclick="hideElement('register'); showElement('login')">Log in. </a></p>
 </div>
 </body>

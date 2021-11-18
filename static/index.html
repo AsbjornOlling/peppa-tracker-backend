@@ -7,10 +7,10 @@
 
 <style>
     body {
-      background-image: url('static/pepaBackground.jpg');
-      background-repeat: no-repeat;
-      background-attachment: fixed;
-       background-size: 100% 100%;
+        background-image: url('static/pepaBackground.jpg');
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-size: 100% 100%;
     }
     button{
         text-align: center;
@@ -32,9 +32,15 @@
         /*position: absolute;*/
         /*top: 20%;*/
         left:35%;
-        text-align: center;
-        width:max-content;
-        height:max-content;
+        text-align: left;
+        width: max-content;
+        height: max-content;
+        padding: 1em;
+        margin: auto;
+        border-radius: 5%;
+    }
+    .addnewBoxHeader{
+      text-align: center;
     }
     .addnewCross{
         width:50px;
@@ -61,8 +67,6 @@
 
 
 <body>
-
-<center>
 
 <!-- Kid UI: Send and receive messages. -->
 <div class="box" style="border: 1px solid #FF6161;" hidden>
@@ -93,16 +97,18 @@
 
 <!-- Device pairing modal -->
 <div id="pairDevice" class="addnewBox" hidden>
-    <br>
-      <form method="post" action="/pair_device">
+    <form method="post" action="/pair_device">
         <fieldset>
-            <legend>Add new device</legend>
-            <ul>
-                <li>Device ID: <input name="deviceID" style="background-color: antiquewhite">
-                </li>
-                <li>Kid name: <input name="kidName" style="background-color: antiquewhite">
-                </li>
-            </ul><input type="submit" style="text-align: center; padding: 2px; background-color: #ffc0c1; color: black;" value="Add device">
+            <legend class="addnewBoxHeader">Add new device</legend>
+            <label for="deviceID" style="text-align: left">Device ID:</label><br/>
+            <input id="deviceID" name="deviceID" style="background-color: antiquewhite"/><br/>
+            <br/>
+
+            <label for="kidName">Kid Name:</label><br/>
+            <input name="kidName" style="background-color: antiquewhite"/><br/>
+            <br/>
+
+            <input type="submit" style="text-align: center; padding: 2px; background-color: #ffc0c1; color: black;" value="Add device"/>
         </fieldset>
     </form>
 </div>
@@ -138,5 +144,4 @@
     </form>
     <p> Already registered? <a href="/">Log in. </a></p>
 </div>
-</center>
 </body>

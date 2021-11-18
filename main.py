@@ -133,6 +133,14 @@ async def logout(response: Response):
     response.delete_cookie(key="session")
 
 
+@app.get("/auth_status")
+async def auth_status(session: Optional[str] = Cookie(None)):
+    """ 200 if authenticated, 401 if not """
+    # this will abort w/ 401 if session invalid or missing
+    session_data = check_auth(session)
+    return session_data
+
+
 @app.post("/pair_device/{device_id}")
 async def pair_device(device_id: str, session: Optional[str] = Cookie(None)):
     """ Pair device with user """

@@ -22,6 +22,14 @@ async def test_hello_world():
     assert "Hello, world!" in r.text
 
 
+@pytest.mark.asyncio
+async def test_html():
+    async with new_client() as client:
+        r = await client.get("/")
+    assert 200 == r.status_code
+    assert r.headers['content-type'] == 'text/html; charset=utf-8'
+
+
 @pytest.fixture
 async def logged_in_user():
     """ Users register and log in """
@@ -166,3 +174,11 @@ async def test_invalid_session():
         client.cookies["session"] = "foobar"
         r = await client.get("/paired_devices")
     assert r.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_auth_status(logged_in_user):
+    _, _, client = logged_in_user
+    r = await client.get("/auth_status")
+    assert r.status_code == 200
+    await client.aclose()

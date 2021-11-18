@@ -8,3 +8,4 @@ motor
 httpx
 pytest-asyncio
 coverage
+aiofiles

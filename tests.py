@@ -17,7 +17,7 @@ new_client = lambda: AsyncClient(app=main.app, base_url="http://localhost:8080")
 @pytest.mark.asyncio
 async def test_hello_world():
     async with new_client() as client:
-        r = await client.get("/")
+        r = await client.get("/helloworld")
     assert 200 == r.status_code 
     assert "Hello, world!" in r.text
 

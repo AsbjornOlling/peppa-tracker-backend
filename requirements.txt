@@ -4,6 +4,8 @@
 #
 #    pip-compile
 #
+aiofiles==0.7.0
+    # via -r requirements.in
 anyio==3.3.4
     # via httpcore
 asgiref==3.4.1

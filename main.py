@@ -10,10 +10,11 @@ from fastapi import (
     FastAPI,
     HTTPException,
     Response,
-
     Request,
     Cookie
 )
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import motor.motor_asyncio
 
@@ -23,6 +24,11 @@ JWT_SECRET: str = os.urandom(64).hex()
 
 # lets go fastapi
 app = FastAPI()
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+
+with open("static/index.html") as f:
+    html = f.read()
 
 
 async def get_db():
@@ -41,10 +47,15 @@ def check_auth(session: Optional[str]) -> dict:
         raise HTTPException(status_code=401, detail=f"Invalid JWT: {e}")
 
 
-@app.get("/")
+@app.get("/", response_class=HTMLResponse)
 def index():
     # TODO: if session cookie is set, show main page with list of kids
     #       if session cookie is not set, show login page
+    return html
+
+
+@app.get("/helloworld")
+def helloworld():
     return "Hello, world!"
 
 

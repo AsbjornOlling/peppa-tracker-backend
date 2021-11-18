@@ -6,56 +6,66 @@
 <title>Pepa Tracker</title>
 
 <style>
-
-      body {
-        background-image: url('static/pepaBackground.jpg');
-        background-repeat: no-repeat;
-        background-attachment: fixed;
-         background-size: 100% 100%;
-      }
-      button{
-          text-align: center;
-          padding: 2px;
-          background-color: #FF6161;
-          color: black;
-      }
-      .box{
-          /*position: absolute;*/
-          /*top: 20%;*/
-          left:25%;
-          width: 40%;
-          height:40%;
-          text-align: center;
-      }
-      .addnewBox{
-          border: none;
-          background-color: #FF6161;
-          /*position: absolute;*/
-          /*top: 20%;*/
-          left:35%;
-          text-align: center;
-          width:max-content;
-          height:max-content;
-      }
-      .addnewCross{
-          width:50px;
-          height:50px;
-          border-radius: 30px;
-          position: absolute;
-          bottom: 10px;
-          right: 10px;
-      }
-      ul {
-        list-style-type: none;
-      }
-
+    body {
+      background-image: url('static/pepaBackground.jpg');
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+       background-size: 100% 100%;
+    }
+    button{
+        text-align: center;
+        padding: 2px;
+        background-color: #FF6161;
+        color: black;
+    }
+    .box{
+        /*position: absolute;*/
+        /*top: 20%;*/
+        left:25%;
+        width: 40%;
+        height:40%;
+        text-align: center;
+    }
+    .addnewBox{
+        border: none;
+        background-color: #FF6161;
+        /*position: absolute;*/
+        /*top: 20%;*/
+        left:35%;
+        text-align: center;
+        width:max-content;
+        height:max-content;
+    }
+    .addnewCross{
+        width:50px;
+        height:50px;
+        border-radius: 30px;
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+    }
+    ul {
+      list-style-type: none;
+    }
 </style>
+
+<script>
+  // some js utilities
+  function showElement(idStr) {
+    console.log("Showing element " + idStr)
+    document.getElementById(idStr).removeAttribute("hidden");
+  }
+</script>
 
 </head>
 
 
 <body>
-<div class="box" style="border: 1px solid #FF6161;">
+
+<center>
+
+<!-- Kid UI: Send and receive messages. -->
+<div class="box" style="border: 1px solid #FF6161;" hidden>
     <br>
     <img src="static/download.png" style="position: center; width:110px; height:110px;"> <br><br>
     <button id="sendmessage"> Send message </button><br><br>
@@ -63,20 +73,28 @@
     <button id="locatekid"> Locate kid </button><br><br>
 </div>
 
-<a href="javascript:void(0)" onclick="modal_open('addNewDevice')">
+
+<!-- Device Pairing UI -->
+
+<!-- (+) button to open device pairing -->
+<a onclick="showElement('pairDevice')">
    <button class="addnewCross" id="add"> + </button>
 </a>
 
+
+<!-- (x) button to close device pairing -->
+<!-- TODO: this is kind of broken.. where is this button? -->
 <div class="modal" style="display: none; background: #FF6161" id="addNewDevice">
-         <a href="javascript:void(0)" onclick="modal_close('addNewDevice')">
-                <button style="border-radius: 25px; width:20px; height:20px; position: fixed"> X </button>
-         </a>
+    <a href="javascript:void(0)" onclick="modal_close('addNewDevice')">
+        <button style="border-radius: 25px; width:20px; height:20px; position: fixed"> X </button>
+    </a>
 </div>
 
-<div class="addnewBox">
-    <br>
 
-      <form method="post" action="/register_device">
+<!-- Device pairing modal -->
+<div id="pairDevice" class="addnewBox" hidden>
+    <br>
+      <form method="post" action="/pair_device">
         <fieldset>
             <legend>Add new device</legend>
             <ul>
@@ -89,7 +107,7 @@
     </form>
 </div>
 
-<div class="box">
+<div id="login" class="box" hidden>
     <br>
     <form method="post" action="/login">
         <fieldset>
@@ -102,10 +120,10 @@
             </ul><input type="submit" style="text-align: center; padding: 2px; background-color: #ffc0c1; color: black;" value="Log in">
         </fieldset>
     </form>
-            <p> Not registered? <a href="/">Register here. </a></p>
+    <p> Not registered? <a href="/">Register here. </a></p>
 </div>
 
-<div class="box">
+<div class="box" hidden>
     <br>
     <form method="post" action="/register_user">
         <fieldset>
@@ -120,7 +138,5 @@
     </form>
     <p> Already registered? <a href="/">Log in. </a></p>
 </div>
-
+</center>
 </body>
-
-

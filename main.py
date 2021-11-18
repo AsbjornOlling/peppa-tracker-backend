@@ -27,9 +27,6 @@ app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
-with open("static/index.html") as f:
-    html = f.read()
-
 
 async def get_db():
     """ Make client for mongo db. """
@@ -49,8 +46,14 @@ def check_auth(session: Optional[str]) -> dict:
 
 @app.get("/", response_class=HTMLResponse)
 def index():
-    # TODO: if session cookie is set, show main page with list of kids
-    #       if session cookie is not set, show login page
+    """ Send out the front-end """
+    with open("static/index.html") as f:
+        # XXX: reading from disk on each request is really slow / bad
+        #      especially when we could easily just keep it in memory
+        #      BUT it's convenient when working on the html stuff
+        #      because we then don't have to reload on each change
+        html = f.read()
+
     return html
 
 
@@ -66,6 +69,7 @@ class DeviceRegistration(BaseModel):
 
 @app.post("/register_device")
 async def register_device(data: DeviceRegistration):
+    """ Endpoint used by the tracker device, on first boot.  """
     # check shared key, write device into database
     if data.shared_key != DEVICE_SHARED_KEY:
         raise HTTPException(status_code=401, detail="Incorrect shared_key.")

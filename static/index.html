@@ -51,7 +51,7 @@
         right: 10px;
     }
     ul {
-      list-style-type: none;
+        list-style-type: none;
     }
 </style>
 
@@ -60,6 +60,11 @@
   function showElement(idStr) {
     console.log("Showing element " + idStr)
     document.getElementById(idStr).removeAttribute("hidden");
+  }
+
+  function hideElement(idStr) {
+    console.log("Hiding element " + idStr)
+    document.getElementById(idStr).setAttribute("hidden", true);
   }
 </script>
 
@@ -85,21 +90,15 @@
    <button class="addnewCross" id="add"> + </button>
 </a>
 
-
-<!-- (x) button to close device pairing -->
-<!-- TODO: this is kind of broken.. where is this button? -->
-<div class="modal" style="display: none; background: #FF6161" id="addNewDevice">
-    <a href="javascript:void(0)" onclick="modal_close('addNewDevice')">
-        <button style="border-radius: 25px; width:20px; height:20px; position: fixed"> X </button>
-    </a>
-</div>
-
-
 <!-- Device pairing modal -->
 <div id="pairDevice" class="addnewBox" hidden>
+    <button style="text-align: right; margin-left: 90%;" onclick="hideElement('pairDevice')"> X </button>
     <form method="post" action="/pair_device">
         <fieldset>
-            <legend class="addnewBoxHeader">Add new device</legend>
+            <legend class="addnewBoxHeader">
+              Add new device
+            </legend>
+
             <label for="deviceID" style="text-align: left">Device ID:</label><br/>
             <input id="deviceID" name="deviceID" style="background-color: antiquewhite"/><br/>
             <br/>

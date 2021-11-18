@@ -123,21 +123,42 @@
     </div>
 
     <!-- User Login -->
+    <script>
+        function login_user() {
+            // get username / password from field
+            // and submit them to the backend
+            let username = document.getElementById("login_username").value;
+            let password = document.getElementById("login_password").value;
+
+            fetch("/login", {
+                method: "POST",
+                body: JSON.stringify({username: username, password: password}),
+                headers: {'Content-Type': 'application/json'}
+            }).then(r => {
+                if (r.status != 200) {
+                    // some kind of error; show it.
+                    r.json().then(d => alert(d.detail))
+                } else {
+                    // success!
+                    hideElement("login")
+                    showElement("kid")
+                }
+            })
+        }
+    </script>
     <div id="login" class="box" hidden>
         <br>
-        <form method="post" action="/login">
-            <fieldset>
-                <legend>Log in</legend>
+        <fieldset>
+            <legend>Log in</legend>
 
-                <label for="login_username">Username:</label></br>
-                <input id="login_username" name="username" style="background-color: antiquewhite"/><br/>
+            <label for="login_username">Username:</label></br>
+            <input id="login_username" name="username" style="background-color: antiquewhite"/><br/>
 
-                <label for="login_password">Password:</label></br>
-                <input id="login_password" name="password" style="background-color: antiquewhite"/><br/>
+            <label for="login_password">Password:</label></br>
+            <input id="login_password" type="password" name="password" style="background-color: antiquewhite"/><br/>
 
-                <input type="submit" style="background-color: #ffc0c1; color: black;" value="Log in">
-            </fieldset>
-        </form>
+            <button onclick="login_user()" style="background-color: #ffc0c1; color: black;">Log in</button>
+        </fieldset>
         <p> Not registered? <a href="#" onclick="showElement('register'); hideElement('login')">Register here. </a></p>
     </div>
 

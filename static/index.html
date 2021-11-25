@@ -16,15 +16,30 @@
             padding: 2px;
             background-color: #FF6161;
             color: black;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
         }
         .box {
-            /*position: absolute;*/
-            /*top: 20%;*/
-            margin: auto;
+            position: absolute;
+            top: 15%;
             left: 25%;
-            width: 20em;
-            text-align: left;
+            width: 10%;
+            padding: 2%;
+            align-items: center;
+            justify-content: center;
         }
+
+        .boxKid {
+            position: absolute;
+            top: 10%;
+            left: 20%;
+            width: 8%;
+            padding: 1%;
+            align-items: center;
+            justify-content: center;
+        }
+
         .addnewBox{
             border: none;
             background-color: #FF6161;
@@ -84,9 +99,9 @@
 <body>
 
     <!-- Kid UI: Send and receive messages. -->
-    <div id="kid" class="box" style="border: 1px solid #FF6161;" hidden>
+    <div id="kid" class="boxKid" style="border: 1px solid #FF6161;" hidden>
         <br>
-        <img src="static/download.png" style="position: center; width:110px; height:110px;"> <br><br>
+        <img src="static/download.png" style="position: center; width:80px; height:80px; display: block; margin-left: auto; margin-right: auto;"> <br><br>
         <button id="sendmessage"> Send message </button><br><br>
         <button id="listenmessage"> Listen message </button><br><br>
         <button id="locatekid"> Locate kid </button><br><br>

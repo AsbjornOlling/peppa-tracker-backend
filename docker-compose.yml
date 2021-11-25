@@ -7,7 +7,7 @@ services:
   app:
     container_name: app
     build: .
-    command: "uvicorn main:app --reload --host 0.0.0.0 --port 8080"
+    command: "uvicorn main:app --reload-dir /app --reload-dir /app/static --host 0.0.0.0 --port 8080"
     environment:
       MONGODB_CONNECTION_STRING: "mongodb://db"
     volumes:

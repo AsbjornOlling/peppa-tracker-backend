@@ -1,11 +1,13 @@
 # std lib
+import io
 import uuid
 import asyncio
 
 # deps
 import pytest
-# from fastapi.testclient import TestClient
 from httpx import AsyncClient
+from pydub import AudioSegment
+from pydub.generators import WhiteNoise
 
 # local imports
 import main
@@ -182,3 +184,49 @@ async def test_auth_status(logged_in_user):
     r = await client.get("/auth_status")
     assert r.status_code == 200
     await client.aclose()
+
+
+@pytest.mark.asyncio
+async def test_send_audio_to_kid(paired_user_and_device):
+    (username, password, client), (device_id, device_client) = paired_user_and_device
+
+    # make 5 seconds of white noise mp3 (duration is measured in ms)
+    audio_seg: AudioSegment = WhiteNoise().to_audio_segment(duration=5000)
+    mp3_filelike: io.BytesIO = io.BytesIO()
+    audio_seg.export(mp3_filelike, format="mp3")
+    mp3_bytes: bytes = mp3_filelike.read()
+
+    # send the audio
+    r = await client.post(
+        f"/send_message/{device_id}",
+        data=mp3_bytes,
+        headers={"Content-Type": "audio/mpeg"}
+    )
+    assert r.status_code == 200
+    message_id = r.text
+    assert len(message_id) == 36, "Did not receive uuid for message"
+    await client.aclose()
+
+    # list new messages for device
+    r = await device_client.get("/messages")
+    assert r.status_code == 200, "Failed listing device messages"
+    assert isinstance(r.json(), list)
+    assert len(r.json()) == 1
+    assert r.json()[0] == {"from": username, "to": device_id, "message_id": message_id}
+
+    # fetch the audio message
+    r = await device_client.get(f"/messages/{message_id}")
+    assert r.status_code == 200, "Failed fetching message"
+    assert r["Content-Type"] == "audio/mpeg"
+    assert r.data == mp3_bytes
+
+    # now delete the message
+    r = await device_client.post(f"/delete_message/{message_id}")
+    assert r.status_code == 200
+
+    # check that it is gone
+    r = await device_client.get("/messages")
+    assert r.status_code == 200
+    assert isinstance(r.json(), list)
+    assert len(r.json()) == 0
+    await device_client.aclose()
